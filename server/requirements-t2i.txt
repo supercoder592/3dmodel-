@@ -1,0 +1,8 @@
+# pip install -r server/requirements-t2i.txt   (install torch for your CUDA version first)
+diffusers>=0.31
+transformers>=4.45
+accelerate>=1.0
+safetensors
+fastapi
+uvicorn[standard]
+pillow

@@ -1,8 +1,8 @@
 import Studio from "@/components/Studio";
-import { isDemoMode } from "@/lib/providers";
+import { getEngineInfo } from "@/lib/providers";
 
 export const dynamic = "force-dynamic";
 
-export default function Page() {
-  return <Studio demo={isDemoMode()} />;
+export default async function Page() {
+  return <Studio engine={await getEngineInfo()} />;
 }

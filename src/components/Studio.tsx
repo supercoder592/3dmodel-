@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createTask, fetchTask, loadHistory, saveHistory, toDownloadUrl, toViewerUrl, type HistoryItem } from "@/lib/client";
+import { createTask, fetchEngine, fetchTask, loadHistory, saveHistory, toDownloadUrl, toViewerUrl, type EngineInfo, type HistoryItem } from "@/lib/client";
 import type { TaskState } from "@/lib/providers/types";
 import ImageDrop from "./ImageDrop";
 import type { ViewerSettings } from "./ModelViewer";
@@ -19,8 +19,15 @@ const EXAMPLES = [
   "A cozy mushroom house with a tiny door and chimney",
 ];
 
-export default function Studio({ demo }: { demo: boolean }) {
-  const [mode, setMode] = useState<Mode>("text");
+const ENGINE_LABEL: Record<string, string> = {
+  hunyuan: "Hunyuan3D（自架，免 credits）",
+  meshy: "Meshy API",
+  mock: "示範模式",
+};
+
+export default function Studio({ engine: initialEngine }: { engine: EngineInfo }) {
+  const [engine, setEngine] = useState<EngineInfo>(initialEngine);
+  const [mode, setMode] = useState<Mode>(initialEngine.textToModel ? "text" : "image");
   const [prompt, setPrompt] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
@@ -40,6 +47,9 @@ export default function Studio({ demo }: { demo: boolean }) {
     const h = loadHistory();
     setHistory(h);
     if (h[0]) setCurrent(h[0]);
+    // Re-check backends every 30s so the banner reflects a server that came up later.
+    const id = window.setInterval(() => fetchEngine().then(setEngine).catch(() => {}), 30_000);
+    return () => window.clearInterval(id);
   }, []);
 
   const stopPolling = useCallback(() => {
@@ -132,11 +142,20 @@ export default function Studio({ demo }: { demo: boolean }) {
         <header>
           <h1 className="text-xl font-semibold tracking-tight">3D Studio</h1>
           <p className="mt-1 text-sm" style={{ color: "var(--muted)" }}>輸入描述或上傳圖片，自動生成 3D 模型。</p>
-          {demo && (
+          <div className="mt-2 flex items-center gap-2 text-xs" style={{ color: "var(--muted)" }}>
+            <span className="inline-block h-2 w-2 rounded-full" style={{ background: engine.notes.length ? "#ffb020" : "#3ddc84" }} />
+            引擎：{ENGINE_LABEL[engine.provider] ?? engine.provider}
+          </div>
+          {engine.demo && (
             <div className="mt-2 rounded-lg px-3 py-2 text-xs" style={{ background: "rgba(255,196,0,.08)", color: "#ffd166", border: "1px solid rgba(255,196,0,.25)" }}>
-              示範模式：尚未設定 <code>MESHY_API_KEY</code>，會回傳內建範例模型。
+              示範模式：尚未設定 <code>HUNYUAN_URL</code> 或 <code>MESHY_API_KEY</code>，會回傳內建範例模型。
             </div>
           )}
+          {engine.notes.map((n) => (
+            <div key={n} className="mt-2 rounded-lg px-3 py-2 text-xs" style={{ background: "rgba(255,176,32,.08)", color: "#ffb020", border: "1px solid rgba(255,176,32,.25)" }}>
+              {n}
+            </div>
+          ))}
         </header>
 
         <div className="flex rounded-lg p-1" style={{ background: "var(--panel-2)" }}>
@@ -145,7 +164,8 @@ export default function Studio({ demo }: { demo: boolean }) {
               key={m}
               type="button"
               onClick={() => setMode(m)}
-              disabled={busy}
+              disabled={busy || (m === "text" && !engine.textToModel)}
+              title={m === "text" && !engine.textToModel ? "需要設定 T2I_URL" : undefined}
               className="flex-1 rounded-md py-1.5 text-sm font-medium transition"
               style={mode === m ? { background: "var(--panel)", color: "var(--text)" } : { color: "var(--muted)" }}
             >

@@ -35,8 +35,21 @@ export function toViewerUrl(modelUrl: string): string {
 }
 
 export function toDownloadUrl(modelUrl: string, name: string): string {
+  if (modelUrl.startsWith("/api/files/")) return `${modelUrl}?download=${encodeURIComponent(name)}`;
   if (modelUrl.startsWith("/")) return modelUrl;
   return `/api/model?url=${encodeURIComponent(modelUrl)}&download=${encodeURIComponent(name)}`;
+}
+
+export interface EngineInfo {
+  provider: string;
+  demo: boolean;
+  textToModel: boolean;
+  notes: string[];
+}
+
+export async function fetchEngine(): Promise<EngineInfo> {
+  const res = await fetch("/api/health", { cache: "no-store" });
+  return res.json();
 }
 
 export async function createTask(form: FormData): Promise<{ taskId: string; kind: "text" | "image"; demo: boolean }> {
