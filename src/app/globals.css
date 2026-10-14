@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0b0d12;
+  --panel: #12151c;
+  --panel-2: #181c25;
+  --border: #262b36;
+  --text: #e8eaf0;
+  --muted: #8b93a5;
+  --accent: #6d8dff;
+  --accent-2: #9b6dff;
+  --danger: #ff6b6b;
+}
+
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: white;
+  transition: filter .15s ease, transform .1s ease;
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.1); }
+.btn-primary:active:not(:disabled) { transform: scale(.985); }
+.btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+
+.btn-ghost {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  transition: background .15s ease;
+}
+.btn-ghost:hover:not(:disabled) { background: #202532; }
+.btn-ghost[data-active="true"] { border-color: var(--accent); color: #c3d0ff; }
+.btn-ghost:disabled { opacity: .4; cursor: not-allowed; }
+
+.progress-bar {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width .4s ease;
+}
+
+.dropzone[data-drag="true"] { border-color: var(--accent); background: rgba(109,141,255,.08); }
+
+.viewer-grid {
+  background-color: #0e1117;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner { animation: spin 1s linear infinite; }
